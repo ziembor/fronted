@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Training Break Timer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2em;
+        }
+
+        .setup-screen, .timer-screen {
+            display: none;
+        }
+
+        .setup-screen.active, .timer-screen.active {
+            display: block;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+        }
+
+        input[type="datetime-local"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        select {
+            background-color: white;
+            cursor: pointer;
+        }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        select[multiple] {
+            min-height: 120px;
+        }
+
+        .timezone-hint {
+            font-size: 0.9em;
+            color: #888;
+            margin-top: 5px;
+        }
+
+        .quick-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 15px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .quick-btn {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .quick-btn:hover {
+            background: #e0e0e0;
+            transform: translateY(-2px);
+        }
+
+        .start-btn {
+            background: #667eea;
+            color: white;
+            width: 100%;
+            font-size: 18px;
+        }
+
+        .start-btn:hover {
+            background: #5568d3;
+        }
+
+        .start-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .countdown {
+            text-align: center;
+            margin: 40px 0;
+        }
+
+        .time-remaining {
+            font-size: 4em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .time-remaining.warning {
+            color: #f39c12;
+        }
+
+        .time-remaining.urgent {
+            color: #e74c3c;
+        }
+
+        .countdown-label {
+            font-size: 1.2em;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .current-times {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .time-display {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .time-display:last-child {
+            margin-bottom: 0;
+        }
+
+        .time-label {
+            font-weight: 600;
+            color: #555;
+        }
+
+        .time-value {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .end-time-info {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 15px;
+            background: #e8eaf6;
+            border-radius: 8px;
+        }
+
+        .end-time-label {
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .end-time-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .reset-btn {
+            background: #95a5a6;
+            color: white;
+            width: 100%;
+        }
+
+        .reset-btn:hover {
+            background: #7f8c8d;
+        }
+
+        .finished-message {
+            display: none;
+            text-align: center;
+            font-size: 2em;
+            color: #27ae60;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        .finished-message.show {
+            display: block;
+        }
+
+        .toggle-group {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .toggle-label {
+            font-weight: 600;
+            color: #555;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.3s;
+            border-radius: 24px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+
+        .toggle-switch input:checked + .toggle-slider {
+            background-color: #667eea;
+        }
+
+        .toggle-switch input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Training Break Timer</h1>
+
+        <!-- Setup Screen -->
+        <div class="setup-screen active">
+            <div class="input-group">
+                <label>Quick Options:</label>
+                <div class="quick-options">
+                    <button class="quick-btn" onclick="setQuickTime(15)">+15 Minutes</button>
+                    <button class="quick-btn" onclick="setQuickTime(30)">+30 Minutes</button>
+                    <button class="quick-btn" onclick="setNextFullHour()">Next Full Hour</button>
+                    <button class="quick-btn" onclick="setNextQuarter()">Next :15 After Hour</button>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label for="customMinutes">Or Custom Minutes:</label>
+                <input type="number" id="customMinutes" min="1" placeholder="Enter minutes">
+            </div>
+
+            <div class="input-group">
+                <label for="specificTime">Or Specific End Time:</label>
+                <input type="datetime-local" id="specificTime">
+            </div>
+
+            <div class="input-group">
+                <label for="timezoneSelect">Additional Timezones to Display:</label>
+                <select id="timezoneSelect" multiple>
+                    <option value="America/New_York">EST/EDT (New York)</option>
+                    <option value="America/Chicago">CST/CDT (Chicago)</option>
+                    <option value="America/Denver">MST/MDT (Denver)</option>
+                    <option value="America/Los_Angeles">PST/PDT (Los Angeles)</option>
+                    <option value="Europe/London">GMT/BST (London)</option>
+                    <option value="Europe/Berlin">CET/CEST (Berlin)</option>
+                    <option value="Europe/Moscow">MSK (Moscow)</option>
+                    <option value="Asia/Dubai">GST (Dubai)</option>
+                    <option value="Asia/Kolkata">IST (India)</option>
+                    <option value="Asia/Shanghai">CST (China)</option>
+                    <option value="Asia/Tokyo">JST (Tokyo)</option>
+                    <option value="Asia/Seoul">KST (Seoul)</option>
+                    <option value="Australia/Sydney">AEDT/AEST (Sydney)</option>
+                    <option value="Pacific/Auckland">NZDT/NZST (Auckland)</option>
+                </select>
+                <div class="timezone-hint">Hold Ctrl/Cmd to select multiple timezones</div>
+            </div>
+
+            <div class="toggle-group">
+                <label class="toggle-label" for="showSeconds">Show Seconds:</label>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="showSeconds">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+
+            <div class="toggle-group">
+                <label class="toggle-label" for="playSound">Play Sound at End:</label>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="playSound">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+
+            <button class="start-btn" onclick="startTimer()">Start Break Timer</button>
+        </div>
+
+        <!-- Timer Screen -->
+        <div class="timer-screen">
+            <div class="end-time-info">
+                <div class="end-time-label">Break ends at:</div>
+                <div class="end-time-value" id="endTimeDisplay"></div>
+            </div>
+
+            <div class="countdown">
+                <div class="time-remaining" id="timeRemaining">--:--:--</div>
+                <div class="countdown-label">Time Remaining</div>
+            </div>
+
+            <div class="finished-message" id="finishedMessage">
+                Break Time Over!
+            </div>
+
+            <div class="current-times" id="currentTimesContainer">
+                <!-- Timezones will be populated here dynamically -->
+            </div>
+
+            <button class="reset-btn" onclick="resetTimer()">New Break Timer</button>
+        </div>
+    </div>
+
+    <script>
+        let endTime = null;
+        let timerInterval = null;
+        let selectedTimezones = [];
+        let showSeconds = false;
+        let playSound = false;
+
+        function setQuickTime(minutes) {
+            const now = new Date();
+            endTime = new Date(now.getTime() + minutes * 60000);
+            document.getElementById('customMinutes').value = '';
+            document.getElementById('specificTime').value = '';
+        }
+
+        function setNextFullHour() {
+            const now = new Date();
+            endTime = new Date(now);
+            endTime.setHours(endTime.getHours() + 1);
+            endTime.setMinutes(0);
+            endTime.setSeconds(0);
+            endTime.setMilliseconds(0);
+            document.getElementById('customMinutes').value = '';
+            document.getElementById('specificTime').value = '';
+        }
+
+        function setNextQuarter() {
+            const now = new Date();
+            endTime = new Date(now);
+
+            // Get current minutes
+            const currentMinutes = now.getMinutes();
+
+            // If we're before :15 of current hour, set to :15 of current hour
+            if (currentMinutes < 15) {
+                endTime.setMinutes(15);
+            } else {
+                // Otherwise, set to :15 of next hour
+                endTime.setHours(endTime.getHours() + 1);
+                endTime.setMinutes(15);
+            }
+
+            endTime.setSeconds(0);
+            endTime.setMilliseconds(0);
+            document.getElementById('customMinutes').value = '';
+            document.getElementById('specificTime').value = '';
+        }
+
+        function startTimer() {
+            // Check for custom minutes input
+            const customMinutes = document.getElementById('customMinutes').value;
+            if (customMinutes) {
+                const minutes = parseInt(customMinutes);
+                if (minutes > 0) {
+                    const now = new Date();
+                    endTime = new Date(now.getTime() + minutes * 60000);
+                }
+            }
+
+            // Check for specific time input
+            const specificTime = document.getElementById('specificTime').value;
+            if (specificTime) {
+                endTime = new Date(specificTime);
+            }
+
+            // Validate end time
+            if (!endTime || endTime <= new Date()) {
+                alert('Please select a valid end time in the future');
+                return;
+            }
+
+            // Get selected timezones
+            const timezoneSelect = document.getElementById('timezoneSelect');
+            selectedTimezones = ['UTC', 'Europe/Paris']; // Always show UTC and CET/CEST
+
+            // Add user-selected timezones
+            for (let option of timezoneSelect.selectedOptions) {
+                if (!selectedTimezones.includes(option.value)) {
+                    selectedTimezones.push(option.value);
+                }
+            }
+
+            // Get show seconds preference
+            showSeconds = document.getElementById('showSeconds').checked;
+
+            // Get play sound preference
+            playSound = document.getElementById('playSound').checked;
+
+            // Setup timezone displays
+            setupTimezoneDisplays();
+
+            // Show timer screen
+            document.querySelector('.setup-screen').classList.remove('active');
+            document.querySelector('.timer-screen').classList.add('active');
+
+            // Display end time
+            updateEndTimeDisplay();
+
+            // Start the countdown
+            updateTimer();
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+
+        function setupTimezoneDisplays() {
+            const container = document.getElementById('currentTimesContainer');
+            container.innerHTML = '';
+
+            const timezoneLabels = {
+                'UTC': 'UTC',
+                'Europe/Paris': 'CET/CEST',
+                'America/New_York': 'EST/EDT',
+                'America/Chicago': 'CST/CDT',
+                'America/Denver': 'MST/MDT',
+                'America/Los_Angeles': 'PST/PDT',
+                'Europe/London': 'GMT/BST',
+                'Europe/Berlin': 'CET/CEST',
+                'Europe/Moscow': 'MSK',
+                'Asia/Dubai': 'GST',
+                'Asia/Kolkata': 'IST',
+                'Asia/Shanghai': 'CST',
+                'Asia/Tokyo': 'JST',
+                'Asia/Seoul': 'KST',
+                'Australia/Sydney': 'AEDT/AEST',
+                'Pacific/Auckland': 'NZDT/NZST'
+            };
+
+            selectedTimezones.forEach(tz => {
+                const timeDisplay = document.createElement('div');
+                timeDisplay.className = 'time-display';
+
+                const label = document.createElement('span');
+                label.className = 'time-label';
+                label.textContent = timezoneLabels[tz] || tz + ':';
+
+                const value = document.createElement('span');
+                value.className = 'time-value';
+                value.id = 'time-' + tz.replace(/\//g, '-');
+                value.textContent = '--:--:--';
+
+                timeDisplay.appendChild(label);
+                timeDisplay.appendChild(value);
+                container.appendChild(timeDisplay);
+            });
+        }
+
+        function playSchoolBell() {
+            // Create audio context
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const currentTime = audioContext.currentTime;
+
+            // Play three bell tones in sequence (classic school bell pattern)
+            const bellFrequencies = [800, 660, 800]; // High-Low-High pattern
+            const timing = [0, 0.3, 0.6]; // Time offsets for each bell
+
+            bellFrequencies.forEach((freq, index) => {
+                // Create oscillator for the bell tone
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                // Set bell frequency
+                oscillator.frequency.setValueAtTime(freq, currentTime + timing[index]);
+
+                // Create bell-like envelope (quick attack, exponential decay)
+                gainNode.gain.setValueAtTime(0, currentTime + timing[index]);
+                gainNode.gain.linearRampToValueAtTime(0.3, currentTime + timing[index] + 0.01);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, currentTime + timing[index] + 0.5);
+
+                // Start and stop
+                oscillator.start(currentTime + timing[index]);
+                oscillator.stop(currentTime + timing[index] + 0.5);
+            });
+        }
+
+        function updateEndTimeDisplay() {
+            // Format as ISO 8601: YYYY-MM-DD HH:MM:SS or YYYY-MM-DD HH:MM
+            const year = endTime.getFullYear();
+            const month = String(endTime.getMonth() + 1).padStart(2, '0');
+            const day = String(endTime.getDate()).padStart(2, '0');
+            const hours = String(endTime.getHours()).padStart(2, '0');
+            const minutes = String(endTime.getMinutes()).padStart(2, '0');
+
+            let endTimeStr;
+            if (showSeconds) {
+                const seconds = String(endTime.getSeconds()).padStart(2, '0');
+                endTimeStr = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+            } else {
+                endTimeStr = `${year}-${month}-${day} ${hours}:${minutes}`;
+            }
+
+            document.getElementById('endTimeDisplay').textContent = endTimeStr;
+        }
+
+        function updateTimer() {
+            const now = new Date();
+            const diff = endTime - now;
+
+            // Update current times in ISO 8601 format for all selected timezones
+            selectedTimezones.forEach(tz => {
+                // Use Intl.DateTimeFormat to properly convert to target timezone
+                const formatterOptions = {
+                    timeZone: tz,
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: false
+                };
+
+                if (showSeconds) {
+                    formatterOptions.second = '2-digit';
+                }
+
+                const formatter = new Intl.DateTimeFormat('en-US', formatterOptions);
+
+                const parts = formatter.formatToParts(now);
+                const values = {};
+                parts.forEach(part => {
+                    if (part.type !== 'literal') {
+                        values[part.type] = part.value;
+                    }
+                });
+
+                let timeStr;
+                if (showSeconds) {
+                    timeStr = `${values.year}-${values.month}-${values.day} ${values.hour}:${values.minute}:${values.second}`;
+                } else {
+                    timeStr = `${values.year}-${values.month}-${values.day} ${values.hour}:${values.minute}`;
+                }
+
+                const elementId = 'time-' + tz.replace(/\//g, '-');
+                const element = document.getElementById(elementId);
+                if (element) {
+                    element.textContent = timeStr;
+                }
+            });
+
+            // Update countdown
+            if (diff <= 0) {
+                document.getElementById('timeRemaining').textContent = '00:00:00';
+                document.getElementById('timeRemaining').classList.add('urgent');
+                document.getElementById('finishedMessage').classList.add('show');
+                clearInterval(timerInterval);
+
+                // Play school bell sound if enabled
+                if (playSound) {
+                    playSchoolBell();
+                }
+
+                // Play sound/notification if desired
+                if ('Notification' in window && Notification.permission === 'granted') {
+                    new Notification('Break Time Over!', {
+                        body: 'Your training break has ended.'
+                    });
+                }
+                return;
+            }
+
+            const hours = Math.floor(diff / 3600000);
+            const minutes = Math.floor((diff % 3600000) / 60000);
+            const seconds = Math.floor((diff % 60000) / 1000);
+
+            const timeStr = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            const timeRemainingEl = document.getElementById('timeRemaining');
+            timeRemainingEl.textContent = timeStr;
+
+            // Color coding
+            timeRemainingEl.classList.remove('warning', 'urgent');
+            if (diff < 60000) { // Less than 1 minute
+                timeRemainingEl.classList.add('urgent');
+            } else if (diff < 300000) { // Less than 5 minutes
+                timeRemainingEl.classList.add('warning');
+            }
+        }
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            endTime = null;
+            selectedTimezones = [];
+            showSeconds = false;
+            playSound = false;
+            document.querySelector('.timer-screen').classList.remove('active');
+            document.querySelector('.setup-screen').classList.add('active');
+            document.getElementById('finishedMessage').classList.remove('show');
+            document.getElementById('customMinutes').value = '';
+            document.getElementById('specificTime').value = '';
+            document.getElementById('timezoneSelect').selectedIndex = -1;
+            document.getElementById('showSeconds').checked = false;
+            document.getElementById('playSound').checked = false;
+        }
+
+        // Request notification permission on load
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
+    </script>
+</body>
+</html>
