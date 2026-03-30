@@ -321,9 +321,11 @@
                     <option value="America/Los_Angeles">PST/PDT (Los Angeles)</option>
                     <option value="Europe/London">GMT/BST (London)</option>
                     <option value="Europe/Berlin">CET/CEST (Berlin)</option>
+                    <option value="Europe/Bucharest">EET/EEST (Bucharest)</option>
                     <option value="Europe/Moscow">MSK (Moscow)</option>
                     <option value="Asia/Dubai">GST (Dubai)</option>
                     <option value="Asia/Kolkata">IST (India)</option>
+                    <option value="Asia/Manila">PHT (Manila)</option>
                     <option value="Asia/Shanghai">CST (China)</option>
                     <option value="Asia/Tokyo">JST (Tokyo)</option>
                     <option value="Asia/Seoul">KST (Seoul)</option>
@@ -448,7 +450,7 @@
 
             // Get selected timezones
             const timezoneSelect = document.getElementById('timezoneSelect');
-            selectedTimezones = ['UTC', 'Europe/Paris']; // Always show UTC and CET/CEST
+            selectedTimezones = ['UTC', 'Europe/Paris', 'Asia/Manila', 'Europe/Bucharest']; // Always show UTC, CET/CEST, PHT, and EET/EEST
 
             // Add user-selected timezones
             for (let option of timezoneSelect.selectedOptions) {
@@ -485,6 +487,8 @@
             const timezoneLabels = {
                 'UTC': 'UTC',
                 'Europe/Paris': 'CET/CEST',
+                'Asia/Manila': 'PHT (Manila)',
+                'Europe/Bucharest': 'EET/EEST (Bucharest)',
                 'America/New_York': 'EST/EDT',
                 'America/Chicago': 'CST/CDT',
                 'America/Denver': 'MST/MDT',
