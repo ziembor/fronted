@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teams Contact List</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .panels {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .panel {
+            display: flex;
+            flex-direction: column;
+        }
+
+        h2 {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: #555;
+        }
+
+        textarea {
+            width: 100%;
+            height: 400px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 14px;
+            resize: vertical;
+        }
+
+        .results {
+            width: 100%;
+            height: 400px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #fafafa;
+            overflow-y: auto;
+        }
+
+        .results-section {
+            margin-bottom: 20px;
+        }
+
+        .results-section h3 {
+            font-size: 16px;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .count {
+            color: #666;
+            font-size: 14px;
+            font-weight: normal;
+        }
+
+        .empty {
+            color: #999;
+            font-style: italic;
+        }
+
+        .contact-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .contact-list li {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 10px;
+            margin-bottom: 6px;
+            background-color: #e8f4f8;
+            border-radius: 3px;
+            gap: 10px;
+        }
+
+        .contact-list li .email {
+            font-family: monospace;
+            font-size: 13px;
+            word-break: break-all;
+            color: #333;
+        }
+
+        .teams-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            flex-shrink: 0;
+            padding: 4px 10px;
+            background-color: #6264a7;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        .teams-link:hover {
+            background-color: #464775;
+        }
+
+        .teams-link svg {
+            width: 14px;
+            height: 14px;
+            fill: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Teams Contact List</h1>
+
+        <div class="panels">
+            <div class="panel">
+                <h2>Email Addresses</h2>
+                <textarea id="inputText" placeholder="Paste or type email addresses here, one per line or separated by commas/spaces..."></textarea>
+            </div>
+
+            <div class="panel">
+                <h2>Teams Chat Links</h2>
+                <div class="results" id="results">
+                    <div class="results-section">
+                        <h3>Contacts <span class="count" id="contactCount">(0)</span></h3>
+                        <ul class="contact-list" id="contactList">
+                            <li class="empty">No emails found</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const inputText = document.getElementById('inputText');
+        const contactList = document.getElementById('contactList');
+        const contactCount = document.getElementById('contactCount');
+
+        const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
+
+        function teamsIcon() {
+            return `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20.625 5.625h-5.25V4.5a2.625 2.625 0 1 0-5.25 0v1.125H4.875A2.625 2.625 0 0 0 2.25 8.25v7.5a2.625 2.625 0 0 0 2.625 2.625h5.25V19.5a2.625 2.625 0 0 0 5.25 0v-1.125h5.25a2.625 2.625 0 0 0 2.625-2.625v-7.5a2.625 2.625 0 0 0-2.625-2.625z"/>
+            </svg>`;
+        }
+
+        function buildTeamsUrl(email) {
+            return `https://teams.microsoft.com/l/chat/0/0?users=${encodeURIComponent(email)}`;
+        }
+
+        function extractEmails() {
+            const text = inputText.value;
+            const emails = [...new Set(text.match(emailRegex) || [])];
+
+            if (emails.length > 0) {
+                contactList.innerHTML = emails.map(email => `
+                    <li>
+                        <span class="email">${email}</span>
+                        <a class="teams-link" href="${buildTeamsUrl(email)}" target="_blank" rel="noopener noreferrer">
+                            ${teamsIcon()} Chat
+                        </a>
+                    </li>
+                `).join('');
+                contactCount.textContent = `(${emails.length})`;
+            } else {
+                contactList.innerHTML = '<li class="empty">No emails found</li>';
+                contactCount.textContent = '(0)';
+            }
+        }
+
+        inputText.addEventListener('input', extractEmails);
+    </script>
+</body>
+</html>
