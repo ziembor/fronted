@@ -167,6 +167,7 @@
         const contactList = document.getElementById('contactList');
         const contactCount = document.getElementById('contactCount');
 
+        // Matches valid emails: no leading/trailing dots, no consecutive dots, TLD 2+ chars.
         const emailRegex = /[a-zA-Z0-9](?:[a-zA-Z0-9._%+-]*[a-zA-Z0-9])?@[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}/g;
 
         function escapeHtml(str) {
@@ -179,7 +180,7 @@
         }
 
         function teamsIcon() {
-            return `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            return `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
                 <path d="M20.625 5.625h-5.25V4.5a2.625 2.625 0 1 0-5.25 0v1.125H4.875A2.625 2.625 0 0 0 2.25 8.25v7.5a2.625 2.625 0 0 0 2.625 2.625h5.25V19.5a2.625 2.625 0 0 0 5.25 0v-1.125h5.25a2.625 2.625 0 0 0 2.625-2.625v-7.5a2.625 2.625 0 0 0-2.625-2.625z"/>
             </svg>`;
         }
@@ -196,7 +197,7 @@
                 contactList.innerHTML = emails.map(email => `
                     <li>
                         <span class="email">${escapeHtml(email)}</span>
-                        <a class="teams-link" href="${escapeHtml(buildTeamsUrl(email))}" target="_blank" rel="noopener noreferrer">
+                        <a class="teams-link" href="${escapeHtml(buildTeamsUrl(email))}" target="_blank" rel="noopener noreferrer" aria-label="Open Teams chat with ${escapeHtml(email)}">
                             ${teamsIcon()} Chat
                         </a>
                     </li>
