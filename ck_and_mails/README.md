@@ -1,6 +1,6 @@
-# Email and CK Extractor
+# Email, CK, IP, Hostname and GUID Extractor
 
-A simple single-page web application that extracts email addresses, CK identifiers, and LSA codes from text input.
+A simple single-page web application that extracts email addresses, CK identifiers, LSA codes, IPv4 addresses, hostnames, and GUIDs from text input.
 
 ## Overview
 
@@ -8,6 +8,9 @@ This tool provides a straightforward interface for parsing text and automaticall
 - Email addresses
 - CK codes (custom identifier format)
 - LSA codes (CK with specific suffixes)
+- IPv4 addresses
+- Hostnames with four dot-separated segments or a recognized prefix
+- Standard GUIDs
 
 The extraction happens in real-time as you type or paste content into the input field.
 
@@ -15,7 +18,7 @@ The extraction happens in real-time as you type or paste content into the input 
 
 - **Real-time extraction**: Results update automatically as you type
 - **Dual-panel layout**: Input on the left, results on the right
-- **Duplicate removal**: Each unique email/CK is listed only once
+- **Duplicate removal**: Each unique value is listed only once in its section
 - **Count display**: Shows the total number of found items
 - **No dependencies**: Pure HTML, CSS, and vanilla JavaScript
 - **Single file**: Everything in one HTML file for easy deployment
@@ -38,7 +41,7 @@ Note: LSAs are extracted separately from CKs. If a code matches the LSA pattern,
 
 1. Open `index.html` in any modern web browser
 2. Paste or type your text into the left panel
-3. View extracted emails, CKs, and LSAs in the right panel
+3. View extracted emails, CKs, LSAs, IPv4 addresses, hostnames, and GUIDs in the right panel
 
 No installation or server required.
 
@@ -70,6 +73,32 @@ Examples:
 - `AD\PQ56RST`
 - `ADACC\MN78GHA`
 - `KL90JKD`
+
+### IPv4 Addresses
+Matches four numeric octets separated by dots, each containing one to three digits with a value from 0 to 255.
+
+Examples: `192.168.1.10`, `10.0.0.1`, `255.255.255.255`.
+Invalid addresses such as `999.168.1.10` are not extracted or listed as hostnames.
+
+### Hostnames
+Matches names with exactly four dot-separated segments, or names starting with
+`su800`, `sx9`, or `CLRV0` (case-insensitive). Prefixed names may have a single
+segment or multiple segments.
+
+Segments contain letters, digits, or internal hyphens, are 1-63 characters long,
+and cannot start or end with a hyphen. Names must contain at least one letter
+and be at most 253 characters long. IPv4 addresses appear only in their own section.
+
+Examples: `server.site.example.com`, `su800123`, `sx9node`, `CLRV01`,
+`SU800123.example.com`.
+
+### GUIDs
+Matches hexadecimal GUIDs in the standard `8-4-4-4-12` format, with uppercase
+or lowercase letters. Surrounding braces are accepted but not included in results.
+No particular UUID version or variant is required.
+
+Examples: `550e8400-e29b-41d4-a716-446655440000`,
+`{6F9619FF-8B86-D011-B42D-00C04FC964FF}`.
 
 ## Browser Compatibility
 
