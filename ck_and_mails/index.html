@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Email and CK Extractor</title>
+    <title>Email, CK, IP, Hostname and GUID Extractor</title>
     <style>
         * {
             margin: 0;
@@ -107,7 +107,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>Email and CK Extractor</h1>
+        <h1>Email, CK, IP, Hostname and GUID Extractor</h1>
 
         <div class="panels">
             <div class="panel">
@@ -138,6 +138,27 @@
                             <li class="empty">No LSAs found</li>
                         </ul>
                     </div>
+
+                    <div class="results-section">
+                        <h3>IPv4 Addresses <span class="count" id="ipv4Count">(0)</span></h3>
+                        <ul class="results-list" id="ipv4List">
+                            <li class="empty">No IPv4 addresses found</li>
+                        </ul>
+                    </div>
+
+                    <div class="results-section">
+                        <h3>Hostnames <span class="count" id="hostnameCount">(0)</span></h3>
+                        <ul class="results-list" id="hostnameList">
+                            <li class="empty">No hostnames found</li>
+                        </ul>
+                    </div>
+
+                    <div class="results-section">
+                        <h3>GUIDs <span class="count" id="guidCount">(0)</span></h3>
+                        <ul class="results-list" id="guidList">
+                            <li class="empty">No GUIDs found</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
@@ -151,6 +172,12 @@
         const emailCount = document.getElementById('emailCount');
         const ckCount = document.getElementById('ckCount');
         const lsaCount = document.getElementById('lsaCount');
+        const ipv4List = document.getElementById('ipv4List');
+        const hostnameList = document.getElementById('hostnameList');
+        const ipv4Count = document.getElementById('ipv4Count');
+        const hostnameCount = document.getElementById('hostnameCount');
+        const guidList = document.getElementById('guidList');
+        const guidCount = document.getElementById('guidCount');
 
         // Email regex pattern
         const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
@@ -160,6 +187,12 @@
 
         // CK regex pattern: optional AD\ or ADACC\ prefix, then 2 letters, 2 numbers, 2 letters
         const ckRegex = /(?:AD\\|ADACC\\)?[A-Za-z]{2}\d{2}[A-Za-z]{2}\b/g;
+
+        // Match whole candidates so longer names and invalid octets are not partially extracted.
+        const networkTokenRegex = /[A-Za-z0-9_-]+(?:\.[A-Za-z0-9_-]+)*/g;
+        const hostnameLabelRegex = /^[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?$/;
+        const hostnamePrefixRegex = /^(?:su800|sx9|CLRV0)/i;
+        const guidRegex = /\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/gi;
 
         function extractData() {
             const text = inputText.value;
@@ -173,6 +206,21 @@
             // Extract CKs and filter out those that are part of LSAs
             const allCks = [...new Set(text.match(ckRegex) || [])];
             const cks = allCks.filter(ck => !lsas.some(lsa => lsa.includes(ck)));
+
+            const networkTokens = [...new Set(text.match(networkTokenRegex) || [])];
+            const ipv4s = networkTokens.filter(token => {
+                const segments = token.split('.');
+                return segments.length === 4 &&
+                    segments.every(segment => /^\d{1,3}$/.test(segment) && Number(segment) <= 255);
+            });
+            const hostnames = networkTokens.filter(token => {
+                const segments = token.split('.');
+                return token.length <= 253 &&
+                    /[A-Za-z]/.test(token) &&
+                    segments.every(segment => hostnameLabelRegex.test(segment)) &&
+                    (segments.length === 4 || hostnamePrefixRegex.test(token));
+            });
+            const guids = [...new Set(text.match(guidRegex) || [])];
 
             // Update email list
             if (emails.length > 0) {
@@ -199,6 +247,30 @@
             } else {
                 lsaList.innerHTML = '<li class="empty">No LSAs found</li>';
                 lsaCount.textContent = '(0)';
+            }
+
+            if (ipv4s.length > 0) {
+                ipv4List.innerHTML = ipv4s.map(ip => `<li>${ip}</li>`).join('');
+                ipv4Count.textContent = `(${ipv4s.length})`;
+            } else {
+                ipv4List.innerHTML = '<li class="empty">No IPv4 addresses found</li>';
+                ipv4Count.textContent = '(0)';
+            }
+
+            if (hostnames.length > 0) {
+                hostnameList.innerHTML = hostnames.map(hostname => `<li>${hostname}</li>`).join('');
+                hostnameCount.textContent = `(${hostnames.length})`;
+            } else {
+                hostnameList.innerHTML = '<li class="empty">No hostnames found</li>';
+                hostnameCount.textContent = '(0)';
+            }
+
+            if (guids.length > 0) {
+                guidList.innerHTML = guids.map(guid => `<li>${guid}</li>`).join('');
+                guidCount.textContent = `(${guids.length})`;
+            } else {
+                guidList.innerHTML = '<li class="empty">No GUIDs found</li>';
+                guidCount.textContent = '(0)';
             }
         }
 
