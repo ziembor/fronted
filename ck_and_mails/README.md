@@ -1,6 +1,6 @@
-# Email, CK, IP, Hostname and GUID Extractor
+# Email, CK, Mailbox, Mailing List, IP, Hostname and GUID Extractor
 
-A simple single-page web application that extracts email addresses, CK identifiers, LSA codes, IPv4 addresses, hostnames, and GUIDs from text input.
+A simple single-page web application that extracts email addresses, CK identifiers, LSA codes, shared mailbox names, mailing list names, IPv4 addresses, hostnames, and GUIDs from text input.
 
 ## Overview
 
@@ -8,6 +8,8 @@ This tool provides a straightforward interface for parsing text and automaticall
 - Email addresses
 - CK codes (custom identifier format)
 - LSA codes (CK with specific suffixes)
+- Shared mailbox names (short `mbx` names or `MBX-WP` followed by digits)
+- Mailing list names (`ML-` followed by a name)
 - IPv4 addresses
 - Hostnames with four dot-separated segments or a recognized prefix
 - Standard GUIDs
@@ -41,7 +43,7 @@ Note: LSAs are extracted separately from CKs. If a code matches the LSA pattern,
 
 1. Open `index.html` in any modern web browser
 2. Paste or type your text into the left panel
-3. View extracted emails, CKs, LSAs, IPv4 addresses, hostnames, and GUIDs in the right panel
+3. View extracted emails, CKs, LSAs, shared mailboxes, mailing lists, IPv4 addresses, hostnames, and GUIDs in the right panel
 
 No installation or server required.
 
@@ -73,6 +75,23 @@ Examples:
 - `AD\PQ56RST`
 - `ADACC\MN78GHA`
 - `KL90JKD`
+
+### Shared Mailboxes
+Matches whole names case-insensitively using either format:
+- `mbx` followed by letters, digits, or underscores, with fewer than 9 characters
+  total (3-8 characters).
+- `MBX-WP` followed by one or more digits, with no length limit.
+
+Examples: `mbxteam`, `MBX12345`, `MBX-WP123456`.
+Longer short-format names such as `mbx123456`, and malformed names such as
+`MBX-WP123abc`, are not partially extracted.
+
+### Mailing Lists
+Matches whole names starting with `ML-` (case-insensitive), followed by one or
+more letters, digits, or underscores, with internal or trailing hyphens allowed.
+An empty suffix is not accepted.
+
+Examples: `ML-Team`, `ml-project_123`, `ML-Project-Team`.
 
 ### IPv4 Addresses
 Matches four numeric octets separated by dots, each containing one to three digits with a value from 0 to 255.

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Email, CK, IP, Hostname and GUID Extractor</title>
+    <title>Email, CK, Mailbox, Mailing List, IP, Hostname and GUID Extractor</title>
     <style>
         * {
             margin: 0;
@@ -107,7 +107,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>Email, CK, IP, Hostname and GUID Extractor</h1>
+        <h1>Email, CK, Mailbox, Mailing List, IP, Hostname and GUID Extractor</h1>
 
         <div class="panels">
             <div class="panel">
@@ -136,6 +136,20 @@
                         <h3>LSAs <span class="count" id="lsaCount">(0)</span></h3>
                         <ul class="results-list" id="lsaList">
                             <li class="empty">No LSAs found</li>
+                        </ul>
+                    </div>
+
+                    <div class="results-section">
+                        <h3>Shared Mailboxes <span class="count" id="mailboxCount">(0)</span></h3>
+                        <ul class="results-list" id="mailboxList">
+                            <li class="empty">No shared mailboxes found</li>
+                        </ul>
+                    </div>
+
+                    <div class="results-section">
+                        <h3>Mailing Lists <span class="count" id="mailingListCount">(0)</span></h3>
+                        <ul class="results-list" id="mailingListList">
+                            <li class="empty">No mailing lists found</li>
                         </ul>
                     </div>
 
@@ -172,6 +186,10 @@
         const emailCount = document.getElementById('emailCount');
         const ckCount = document.getElementById('ckCount');
         const lsaCount = document.getElementById('lsaCount');
+        const mailboxList = document.getElementById('mailboxList');
+        const mailboxCount = document.getElementById('mailboxCount');
+        const mailingListList = document.getElementById('mailingListList');
+        const mailingListCount = document.getElementById('mailingListCount');
         const ipv4List = document.getElementById('ipv4List');
         const hostnameList = document.getElementById('hostnameList');
         const ipv4Count = document.getElementById('ipv4Count');
@@ -187,6 +205,10 @@
 
         // CK regex pattern: optional AD\ or ADACC\ prefix, then 2 letters, 2 numbers, 2 letters
         const ckRegex = /(?:AD\\|ADACC\\)?[A-Za-z]{2}\d{2}[A-Za-z]{2}\b/g;
+
+        const identifierTokenRegex = /[A-Za-z0-9_-]+/g;
+        const mailboxRegex = /^(?:mbx[A-Za-z0-9_]{0,5}|MBX-WP\d+)$/i;
+        const mailingListRegex = /^ML-[A-Za-z0-9_][A-Za-z0-9_-]*$/i;
 
         // Match whole candidates so longer names and invalid octets are not partially extracted.
         const networkTokenRegex = /[A-Za-z0-9_-]+(?:\.[A-Za-z0-9_-]+)*/g;
@@ -206,6 +228,10 @@
             // Extract CKs and filter out those that are part of LSAs
             const allCks = [...new Set(text.match(ckRegex) || [])];
             const cks = allCks.filter(ck => !lsas.some(lsa => lsa.includes(ck)));
+
+            const identifierTokens = [...new Set(text.match(identifierTokenRegex) || [])];
+            const mailboxes = identifierTokens.filter(token => mailboxRegex.test(token));
+            const mailingLists = identifierTokens.filter(token => mailingListRegex.test(token));
 
             const networkTokens = [...new Set(text.match(networkTokenRegex) || [])];
             const ipv4s = networkTokens.filter(token => {
@@ -247,6 +273,22 @@
             } else {
                 lsaList.innerHTML = '<li class="empty">No LSAs found</li>';
                 lsaCount.textContent = '(0)';
+            }
+
+            if (mailboxes.length > 0) {
+                mailboxList.innerHTML = mailboxes.map(mailbox => `<li>${mailbox}</li>`).join('');
+                mailboxCount.textContent = `(${mailboxes.length})`;
+            } else {
+                mailboxList.innerHTML = '<li class="empty">No shared mailboxes found</li>';
+                mailboxCount.textContent = '(0)';
+            }
+
+            if (mailingLists.length > 0) {
+                mailingListList.innerHTML = mailingLists.map(list => `<li>${list}</li>`).join('');
+                mailingListCount.textContent = `(${mailingLists.length})`;
+            } else {
+                mailingListList.innerHTML = '<li class="empty">No mailing lists found</li>';
+                mailingListCount.textContent = '(0)';
             }
 
             if (ipv4s.length > 0) {
