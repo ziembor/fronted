@@ -154,6 +154,13 @@
                     </div>
 
                     <div class="results-section">
+                        <h3>Non-Personal-Users <span class="count" id="nonPersonalUserCount">(0)</span></h3>
+                        <ul class="results-list" id="nonPersonalUserList">
+                            <li class="empty">No non-personal users found</li>
+                        </ul>
+                    </div>
+
+                    <div class="results-section">
                         <h3>IPv4 Addresses <span class="count" id="ipv4Count">(0)</span></h3>
                         <ul class="results-list" id="ipv4List">
                             <li class="empty">No IPv4 addresses found</li>
@@ -190,6 +197,8 @@
         const mailboxCount = document.getElementById('mailboxCount');
         const mailingListList = document.getElementById('mailingListList');
         const mailingListCount = document.getElementById('mailingListCount');
+        const nonPersonalUserList = document.getElementById('nonPersonalUserList');
+        const nonPersonalUserCount = document.getElementById('nonPersonalUserCount');
         const ipv4List = document.getElementById('ipv4List');
         const hostnameList = document.getElementById('hostnameList');
         const ipv4Count = document.getElementById('ipv4Count');
@@ -209,6 +218,11 @@
         const identifierTokenRegex = /[A-Za-z0-9_-]+/g;
         const mailboxRegex = /^(?:mbx[A-Za-z0-9_]{0,5}|MBX-WP\d+)$/i;
         const mailingListRegex = /^ML-[A-Za-z0-9_][A-Za-z0-9_-]*$/i;
+        const nonPersonalUserPrefixes = [
+            'GAZ1', 'NPB2', 'NPE9', 'NPF1', 'NPF4', 'NPJ4', 'NPM5',
+            'NPR1', 'NPS4', 'NPX9', 'NPY1', 'NPY7', 'NPZ1', 'NPZ2',
+            'NPZ3', 'NPZ6', 'NPZ7', 'NPZ8', 'saps', 'SVCP', 'SVCS'
+        ];
 
         // Match whole candidates so longer names and invalid octets are not partially extracted.
         const networkTokenRegex = /[A-Za-z0-9_-]+(?:\.[A-Za-z0-9_-]+)*/g;
@@ -232,6 +246,10 @@
             const identifierTokens = [...new Set(text.match(identifierTokenRegex) || [])];
             const mailboxes = identifierTokens.filter(token => mailboxRegex.test(token));
             const mailingLists = identifierTokens.filter(token => mailingListRegex.test(token));
+            const nonPersonalUsers = identifierTokens.filter(token =>
+                token.length <= 20 &&
+                nonPersonalUserPrefixes.some(prefix => token.toLowerCase().startsWith(prefix.toLowerCase()))
+            );
 
             const networkTokens = [...new Set(text.match(networkTokenRegex) || [])];
             const ipv4s = networkTokens.filter(token => {
@@ -289,6 +307,14 @@
             } else {
                 mailingListList.innerHTML = '<li class="empty">No mailing lists found</li>';
                 mailingListCount.textContent = '(0)';
+            }
+
+            if (nonPersonalUsers.length > 0) {
+                nonPersonalUserList.innerHTML = nonPersonalUsers.map(user => `<li>${user}</li>`).join('');
+                nonPersonalUserCount.textContent = `(${nonPersonalUsers.length})`;
+            } else {
+                nonPersonalUserList.innerHTML = '<li class="empty">No non-personal users found</li>';
+                nonPersonalUserCount.textContent = '(0)';
             }
 
             if (ipv4s.length > 0) {
