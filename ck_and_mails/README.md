@@ -20,7 +20,8 @@ The extraction happens in real-time as you type or paste content into the input 
 ## Features
 
 - **Real-time extraction**: Results update automatically as you type
-- **Dual-panel layout**: Input on the left, results on the right
+- **Three-panel layout**: Input, categorized Results, and a read-only `pslists` panel; stacked on smaller screens
+- **PowerShell list output**: `pslists` combines all extracted values, each wrapped in single quotes and separated by a comma and space (e.g., `'AB12CD', 'name@example.com'`)
 - **Duplicate removal**: Each unique value is listed only once in its section
 - **Count display**: Shows the total number of found items
 - **No dependencies**: Pure HTML, CSS, and vanilla JavaScript
@@ -44,7 +45,8 @@ Note: LSAs are extracted separately from CKs. If a code matches the LSA pattern,
 
 1. Open `index.html` in any modern web browser
 2. Paste or type your text into the left panel
-3. View extracted emails, CKs, LSAs, shared mailboxes, mailing lists, non-personal users, IPv4 addresses, hostnames, and GUIDs in the right panel
+3. View extracted emails, CKs, LSAs, shared mailboxes, mailing lists, non-personal users, IPv4 addresses, hostnames, and GUIDs in the Results panel
+4. Copy all unique extracted values from `pslists` as a single quoted, comma-separated list, ordered by the Results categories. This output updates automatically and clears when no values are found.
 
 No installation or server required.
 
