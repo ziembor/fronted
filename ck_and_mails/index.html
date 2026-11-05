@@ -33,8 +33,14 @@
 
         .panels {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 20px;
+        }
+
+        @media (max-width: 800px) {
+            .panels {
+                grid-template-columns: 1fr;
+            }
         }
 
         .panel {
@@ -181,12 +187,19 @@
                         </ul>
                     </div>
                 </div>
+
+            </div>
+
+            <div class="panel">
+                <h2><label for="pslists">pslists</label></h2>
+                <textarea id="pslists" readonly placeholder="Extracted values as a quoted, comma-separated list..."></textarea>
             </div>
         </div>
     </div>
 
     <script>
         const inputText = document.getElementById('inputText');
+        const pslists = document.getElementById('pslists');
         const emailList = document.getElementById('emailList');
         const ckList = document.getElementById('ckList');
         const lsaList = document.getElementById('lsaList');
@@ -265,6 +278,12 @@
                     (segments.length === 4 || hostnamePrefixRegex.test(token));
             });
             const guids = [...new Set(text.match(guidRegex) || [])];
+
+            const allValues = [...new Set([
+                ...emails, ...cks, ...lsas, ...mailboxes, ...mailingLists,
+                ...nonPersonalUsers, ...ipv4s, ...hostnames, ...guids
+            ])];
+            pslists.value = allValues.map(value => `'${value}'`).join(', ');
 
             // Update email list
             if (emails.length > 0) {
