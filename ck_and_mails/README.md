@@ -10,6 +10,7 @@ This tool provides a straightforward interface for parsing text and automaticall
 - LSA codes (CK with specific suffixes)
 - Shared mailbox names (short `mbx` names or `MBX-WP` followed by digits)
 - Mailing list names (`ML-` followed by a name)
+- Non-personal user names beginning with a recognized prefix
 - IPv4 addresses
 - Hostnames with four dot-separated segments or a recognized prefix
 - Standard GUIDs
@@ -43,7 +44,7 @@ Note: LSAs are extracted separately from CKs. If a code matches the LSA pattern,
 
 1. Open `index.html` in any modern web browser
 2. Paste or type your text into the left panel
-3. View extracted emails, CKs, LSAs, shared mailboxes, mailing lists, IPv4 addresses, hostnames, and GUIDs in the right panel
+3. View extracted emails, CKs, LSAs, shared mailboxes, mailing lists, non-personal users, IPv4 addresses, hostnames, and GUIDs in the right panel
 
 No installation or server required.
 
@@ -92,6 +93,14 @@ more letters, digits, or underscores, with internal or trailing hyphens allowed.
 An empty suffix is not accepted.
 
 Examples: `ML-Team`, `ml-project_123`, `ML-Project-Team`.
+
+### Non-Personal Users
+Matches whole words of up to 20 letters, digits, underscores, or hyphens that start
+with one of these prefixes (case-insensitive): `GAZ1`, `NPB2`, `NPE9`, `NPF1`,
+`NPF4`, `NPJ4`, `NPM5`, `NPR1`, `NPS4`, `NPX9`, `NPY1`, `NPY7`, `NPZ1`,
+`NPZ2`, `NPZ3`, `NPZ6`, `NPZ7`, `NPZ8`, `saps`, `SVCP`, or `SVCS`.
+
+Examples: `NPB2john`, `saps-user_1`, `SVCP123`.
 
 ### IPv4 Addresses
 Matches four numeric octets separated by dots, each containing one to three digits with a value from 0 to 255.
