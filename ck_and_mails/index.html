@@ -192,7 +192,7 @@
 
             <div class="panel">
                 <h2><label for="pslists">pslists</label></h2>
-                <textarea id="pslists" readonly placeholder="Extracted values as a quoted, comma-separated list..."></textarea>
+                <textarea id="pslists" readonly placeholder="Extracted values as PowerShell arrays..."></textarea>
             </div>
         </div>
     </div>
@@ -279,11 +279,16 @@
             });
             const guids = [...new Set(text.match(guidRegex) || [])];
 
-            const allValues = [...new Set([
-                ...emails, ...cks, ...lsas, ...mailboxes, ...mailingLists,
-                ...nonPersonalUsers, ...ipv4s, ...hostnames, ...guids
-            ])];
-            pslists.value = allValues.map(value => `'${value}'`).join(', ');
+            const lists = [
+                ['cks', cks], ['mails', emails], ['lsas', lsas],
+                ['mailboxes', mailboxes], ['mailingLists', mailingLists],
+                ['nonPersonalUsers', nonPersonalUsers], ['ipv4s', ipv4s],
+                ['hostnames', hostnames], ['guids', guids]
+            ];
+            pslists.value = lists
+                .filter(([, values]) => values.length > 0)
+                .map(([name, values]) => `$${name} = @(${values.map(value => `"${value}"`).join(', ')})`)
+                .join('\n');
 
             // Update email list
             if (emails.length > 0) {
